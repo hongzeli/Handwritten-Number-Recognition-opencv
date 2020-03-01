@@ -1,0 +1,24 @@
+"""
+Created on Fri Feb 28 21:07:08 2020
+
+@author: lhzcom
+"""
+import torch
+import mnist_main
+from torch.autograd import Variable
+
+def main():
+    use_cuda = torch.cuda.is_available()
+    device = torch.device("cuda" if use_cuda else "cpu")
+    model = mnist_main.Net().to(device)
+    state = torch.load('mnist_cnn.pt')
+    model.load_state_dict(state)
+    model.cpu()
+    
+    
+    dummy_input = Variable(torch.randn(1, 1, 28, 28))
+    torch.onnx.export(model, dummy_input, "mnist_cnn.onnx",  verbose=True, export_params=True)
+    print("Export of torch_model.onnx complete!")
+
+if __name__=="__main__":
+    main()
