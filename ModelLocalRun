@@ -1,0 +1,29 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Feb 29 16:45:19 2020
+
+@author: lhzcom
+"""
+import cv2
+import numpy as np
+
+debug = 0
+
+if __name__== "__main__":
+    net = cv2.dnn.readNetFromONNX("mnist_cnn.onnx")
+    
+    image = cv2.imread("test.png", cv2.IMREAD_GRAYSCALE)
+    _,thresh1 = cv2.threshold(image,127,255,cv2.THRESH_BINARY)
+    thresh1 = 255- thresh1
+    if debug:
+        cv2.imshow("thresh1",thresh1)
+        cv2.waitKey()
+    blob = cv2.dnn.blobFromImage(thresh1, size=(28,28))
+    if debug:
+        kk = blob[0,0,:,:].astype(np.uint8)
+        cv2.imshow("kk",kk)
+        cv2.waitKey()
+    net.setInput(blob)
+    res = net.forward()[0]
+    Result = np.where(res < -9999, -1, abs(res))
+    print(np.argmax(Result))
