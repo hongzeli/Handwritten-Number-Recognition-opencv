@@ -11,20 +11,23 @@ debug = 1
 
 def surface_fitting(img):
     adjustment = np.zeros_like(img)
-    TL = img[:50, :50].mean()
-    BL = img[-50:,:50].mean()
-    # TR = img[:50, -50:].mean()
-    BR = img[-50:, -50:].mean()
-    tile_size = 10 
-#    tile = 200
+    corner_size = 50
+    TL = img[:corner_size, :corner_size].mean()
+    BL = img[-corner_size:,:corner_size].mean()
+    # TR = img[:corner_size, -corner_size:].mean()
+    BR = img[-corner_size:, -corner_size:].mean()
+
+    tile_size = 10
     dim_0 = img.shape[0]
     dim_1 = img.shape[1]
     A = np.array([[0,0,1],[0,dim_0,1],[dim_1,dim_0,1]])
     b = np.array([TL,BL,BR])
-    res = np.linalg.solve(A, b)     *********************until here, not finish
-    for x in range(dim_x//tile_size + 1):
-        for y in range(dim_x//tile_size + 1):
-            adjustment[x*dim/tile:(x+1)*dim/tile, y*dim/tile:(y+1)*dim/tile] = int((BL-TL)*(x*dim/tile)/img.shape[0] + (BR-BL)*(y*dim/tile)/img.shape[0] + TL + 0.5)
+    res = np.linalg.solve(A, b)
+
+    for x in range(dim_1//tile_size + 1):
+        for y in range(dim_0//tile_size + 1):
+            adjustment[y*tile_size:min((y+1)*tile_size, dim_0), x*tile_size:min((x+1)*tile_size, dim_1)] = \
+                x*tile_size*res[0]+y*tile_size*res[1]+res[2]
     return adjustment
 
 if __name__=="__main__":
